@@ -39,6 +39,26 @@ def plot_variable(df, variable, plot_type='hist', **kwargs):
     plt.grid(kwargs.get('grid', True))
     plt.show()
 
+def plot_kde_for_column(dataframe, column_name):
+    """
+    Plots a KDE distribution for a specified column in a DataFrame.
+    
+    Parameters:
+    - dataframe: pandas.DataFrame, the data source
+    - column_name: str, the name of the column to plot
+    """
+    # Set up the figure
+    plt.figure(figsize=(10, 5))
+
+    # KDE plot for the specified column
+    sns.kdeplot(data=dataframe, x=column_name, fill=True)
+    plt.title(f'Distribution of {column_name}')
+    plt.xlabel(column_name)
+    plt.ylabel('Density')
+
+    # Show the plot
+    plt.tight_layout()
+    plt.show()
 
 # 2 : Processing
 
