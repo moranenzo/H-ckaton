@@ -81,7 +81,7 @@ def column_filler(df, col, type=None):
         raise ValueError(f"Unsupported data type: {df[col].dtype}")
 
 
-def separate_columns(df, list):
+def separate_col(df, list):
     categorical_variables = []
     continuous_variables = []
     for col in list:
