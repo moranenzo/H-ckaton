@@ -1,8 +1,14 @@
 # utils.py
 
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from datetime import datetime
+
+
 # 1 : Plotting
 
-def plot_variable(df, variable, plot_type='hist', **kwargs):
+def plot_variable(df, variable, plot_type='hist', figsize=(10, 6), title=None, kde=True, bins=30, color='blue', label=None, x=None, xlabel=None, ylabel=None, grid=True, title_fontsize=16, label_fontsize=14):
     """
     Plot a variable from a DataFrame with customizable plot type.
 
@@ -10,33 +16,45 @@ def plot_variable(df, variable, plot_type='hist', **kwargs):
     - df (pd.DataFrame): The dataset.
     - variable (str): The column name of the variable to plot.
     - plot_type (str): The type of plot ('hist', 'line', 'scatter', 'box', etc.).
-    - **kwargs: Additional keyword arguments for customization.
+    - figsize (tuple): The size of the figure (width, height).
+    - title (str): Title of the plot.
+    - kde (bool): Show KDE for histogram (applies only to 'hist').
+    - bins (int): Number of bins for histogram (applies only to 'hist').
+    - color (str): Color of the plot.
+    - label (str): Label for the plot (applies to 'line').
+    - x (str): Column name for x-axis (required for 'scatter').
+    - xlabel (str): Label for the x-axis.
+    - ylabel (str): Label for the y-axis.
+    - grid (bool): Whether to display grid lines.
+    - title_fontsize (int): Font size for the title.
+    - label_fontsize (int): Font size for axis labels.
 
     Returns:
     - None: Displays the plot.
     """
-    plt.figure(figsize=kwargs.get('figsize', (10, 6)))
-    title = kwargs.get('title', f"Plot of {variable}")
+    plt.figure(figsize=figsize)
+    if title is None:
+        title = f"Plot of {variable}"
 
     if plot_type == 'hist':
-        sns.histplot(df[variable], kde=kwargs.get('kde', True), bins=kwargs.get('bins', 30), color=kwargs.get('color', 'blue'))
+        sns.histplot(df[variable], kde=kde, bins=bins, color=color)
     elif plot_type == 'line':
-        plt.plot(df[variable], color=kwargs.get('color', 'blue'), label=kwargs.get('label', variable))
-        plt.legend()
+        plt.plot(df[variable], color=color, label=label or variable)
+        if label:
+            plt.legend()
     elif plot_type == 'scatter':
-        x = kwargs.get('x')
         if x is None:
             raise ValueError("For scatter plot, 'x' must be specified as a column name.")
-        sns.scatterplot(x=df[x], y=df[variable], color=kwargs.get('color', 'blue'))
+        sns.scatterplot(x=df[x], y=df[variable], color=color)
     elif plot_type == 'box':
-        sns.boxplot(x=df[variable], color=kwargs.get('color', 'blue'))
+        sns.boxplot(x=df[variable], color=color)
     else:
         raise ValueError(f"Unsupported plot type: {plot_type}")
 
-    plt.title(title, fontsize=kwargs.get('title_fontsize', 16))
-    plt.xlabel(kwargs.get('xlabel', variable), fontsize=kwargs.get('label_fontsize', 14))
-    plt.ylabel(kwargs.get('ylabel', 'Frequency' if plot_type == 'hist' else ''), fontsize=kwargs.get('label_fontsize', 14))
-    plt.grid(kwargs.get('grid', True))
+    plt.title(title, fontsize=title_fontsize)
+    plt.xlabel(xlabel or variable, fontsize=label_fontsize)
+    plt.ylabel(ylabel or ('Frequency' if plot_type == 'hist' else ''), fontsize=label_fontsize)
+    plt.grid(grid)
     plt.show()
 
 def plot_kde_for_column(dataframe, column_name):
@@ -85,16 +103,16 @@ def column_filler(df, col, type=None):
     """
     if df[col].dtype in ['int64', 'float64']:
         if type is None or type == 'mean':
-            df[col].fillna(df[col].mean(), inplace=True)  # Replace NaN with the mean
+            df.loc[:, col] = df[col].fillna(df[col].mean())  # Replace NaN with the mean
 
         elif type == 'median':
-            df[col].fillna(df[col].median(), inplace=True)  # Replace NaN with the median
+            df.loc[:, col] = df[col].fillna(df[col].median())  # Replace NaN with the median
 
         else:
             raise ValueError(f"Unsupported method: {type}")
 
     elif df[col].dtype == 'object':
-        df[col].fillna(df[col].mode()[0], inplace=True)  # Replace NaN with the most frequent value (mode)
+        df.loc[:, col] = df[col].fillna(df[col].mode()[0])  # Replace NaN with the most frequent value (mode)
 
     else:
         raise ValueError(f"Unsupported data type: {df[col].dtype}")
@@ -114,6 +132,23 @@ def separate_col(df, list):
             raise ValueError(f"Unsupported data type: {df[col].dtype}")
 
     return categorical_variables, continuous_variables
+
+
+def days_since_start_of_2020(date_str):
+    """
+    Function to calculate the number of days elapsed since January 1, 2020
+    """
+    # Convert the date to a datetime object
+    parsed_date = pd.to_datetime(date_str, format='%Y-%m-%d')
+
+    # Set the reference date (January 1, 2020)
+    ref_date = datetime(2020, 1, 1)
+
+    # Calculate the delta between the date and January 1, 2020
+    delta = parsed_date - ref_date
+
+    # Return the number of days elapsed
+    return delta.days
 
 
 # 3. Variable Analysis
