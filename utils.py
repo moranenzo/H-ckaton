@@ -1,7 +1,9 @@
 # utils.py
 
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
+from datetime import datetime
 
 
 # 1 : Plotting
@@ -81,16 +83,16 @@ def column_filler(df, col, type=None):
     """
     if df[col].dtype in ['int64', 'float64']:
         if type is None or type == 'mean':
-            df[col].fillna(df[col].mean(), inplace=True)  # Replace NaN with the mean
+            df.loc[:, col] = df[col].fillna(df[col].mean())  # Replace NaN with the mean
 
         elif type == 'median':
-            df[col].fillna(df[col].median(), inplace=True)  # Replace NaN with the median
+            df.loc[:, col] = df[col].fillna(df[col].median())  # Replace NaN with the median
 
         else:
             raise ValueError(f"Unsupported method: {type}")
 
     elif df[col].dtype == 'object':
-        df[col].fillna(df[col].mode()[0], inplace=True)  # Replace NaN with the most frequent value (mode)
+        df.loc[:, col] = df[col].fillna(df[col].mode()[0])  # Replace NaN with the most frequent value (mode)
 
     else:
         raise ValueError(f"Unsupported data type: {df[col].dtype}")
@@ -110,6 +112,23 @@ def separate_col(df, list):
             raise ValueError(f"Unsupported data type: {df[col].dtype}")
 
     return categorical_variables, continuous_variables
+
+
+def days_since_start_of_2020(date_str):
+    """
+    Function to calculate the number of days elapsed since January 1, 2020
+    """
+    # Convert the date to a datetime object
+    parsed_date = pd.to_datetime(date_str, format='%Y-%m-%d')
+
+    # Set the reference date (January 1, 2020)
+    ref_date = datetime(2020, 1, 1)
+
+    # Calculate the delta between the date and January 1, 2020
+    delta = parsed_date - ref_date
+
+    # Return the number of days elapsed
+    return delta.days
 
 
 # 3. Variable Analysis
