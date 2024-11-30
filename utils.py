@@ -1,6 +1,6 @@
 # utils.py
 
-### 1 : Plotting
+# 1 : Plotting
 
 def plot_variable(df, variable, plot_type='hist', **kwargs):
     """
@@ -17,7 +17,7 @@ def plot_variable(df, variable, plot_type='hist', **kwargs):
     """
     plt.figure(figsize=kwargs.get('figsize', (10, 6)))
     title = kwargs.get('title', f"Plot of {variable}")
-    
+
     if plot_type == 'hist':
         sns.histplot(df[variable], kde=kwargs.get('kde', True), bins=kwargs.get('bins', 30), color=kwargs.get('color', 'blue'))
     elif plot_type == 'line':
@@ -40,8 +40,7 @@ def plot_variable(df, variable, plot_type='hist', **kwargs):
     plt.show()
 
 
-
-### 2 : Processing
+# 2 : Processing
 
 def column_filler(df, col, type=None):
     """
@@ -95,3 +94,25 @@ def separate_col(df, list):
             raise ValueError(f"Unsupported data type: {df[col].dtype}")
 
     return categorical_variables, continuous_variables
+
+
+# 3. Variable Analysis
+
+def compare(df, var1, var2):
+    # Check if each value in var1 is associated with a unique value in var2
+    unique_var1_to_var2 = df.groupby(var1)[var2].nunique()
+    if (unique_var1_to_var2 == 1).all():
+        print(f"Each value in {var1} is associated with a unique identifier in {var2}.")
+    else:
+        print(f"Some values in {var1} are associated with multiple identifiers in {var2}:")
+        # Print the values in var1 that have more than one unique corresponding value in var2
+        print(unique_var1_to_var2[unique_var1_to_var2 > 1])
+
+    # Check if each value in var2 is associated with a unique value in var1
+    unique_var2_to_var1 = df.groupby(var2)[var1].nunique()
+    if (unique_var2_to_var1 == 1).all():
+        print(f"Each identifier in {var2} is associated with a single value in {var1}.")
+    else:
+        print(f"Some identifiers in {var2} are associated with multiple values in {var1}:")
+        # Print the values in var2 that have more than one unique corresponding value in var1
+        print(unique_var2_to_var1[unique_var2_to_var1 > 1])
