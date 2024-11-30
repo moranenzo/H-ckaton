@@ -1,8 +1,12 @@
 # utils.py
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
 # 1 : Plotting
 
-def plot_variable(df, variable, plot_type='hist', **kwargs):
+def plot_variable(df, variable, plot_type='hist', figsize=(10, 6), title=None, kde=True, bins=30, color='blue', label=None, x=None, xlabel=None, ylabel=None, grid=True, title_fontsize=16, label_fontsize=14):
     """
     Plot a variable from a DataFrame with customizable plot type.
 
@@ -10,33 +14,45 @@ def plot_variable(df, variable, plot_type='hist', **kwargs):
     - df (pd.DataFrame): The dataset.
     - variable (str): The column name of the variable to plot.
     - plot_type (str): The type of plot ('hist', 'line', 'scatter', 'box', etc.).
-    - **kwargs: Additional keyword arguments for customization.
+    - figsize (tuple): The size of the figure (width, height).
+    - title (str): Title of the plot.
+    - kde (bool): Show KDE for histogram (applies only to 'hist').
+    - bins (int): Number of bins for histogram (applies only to 'hist').
+    - color (str): Color of the plot.
+    - label (str): Label for the plot (applies to 'line').
+    - x (str): Column name for x-axis (required for 'scatter').
+    - xlabel (str): Label for the x-axis.
+    - ylabel (str): Label for the y-axis.
+    - grid (bool): Whether to display grid lines.
+    - title_fontsize (int): Font size for the title.
+    - label_fontsize (int): Font size for axis labels.
 
     Returns:
     - None: Displays the plot.
     """
-    plt.figure(figsize=kwargs.get('figsize', (10, 6)))
-    title = kwargs.get('title', f"Plot of {variable}")
+    plt.figure(figsize=figsize)
+    if title is None:
+        title = f"Plot of {variable}"
 
     if plot_type == 'hist':
-        sns.histplot(df[variable], kde=kwargs.get('kde', True), bins=kwargs.get('bins', 30), color=kwargs.get('color', 'blue'))
+        sns.histplot(df[variable], kde=kde, bins=bins, color=color)
     elif plot_type == 'line':
-        plt.plot(df[variable], color=kwargs.get('color', 'blue'), label=kwargs.get('label', variable))
-        plt.legend()
+        plt.plot(df[variable], color=color, label=label or variable)
+        if label:
+            plt.legend()
     elif plot_type == 'scatter':
-        x = kwargs.get('x')
         if x is None:
             raise ValueError("For scatter plot, 'x' must be specified as a column name.")
-        sns.scatterplot(x=df[x], y=df[variable], color=kwargs.get('color', 'blue'))
+        sns.scatterplot(x=df[x], y=df[variable], color=color)
     elif plot_type == 'box':
-        sns.boxplot(x=df[variable], color=kwargs.get('color', 'blue'))
+        sns.boxplot(x=df[variable], color=color)
     else:
         raise ValueError(f"Unsupported plot type: {plot_type}")
 
-    plt.title(title, fontsize=kwargs.get('title_fontsize', 16))
-    plt.xlabel(kwargs.get('xlabel', variable), fontsize=kwargs.get('label_fontsize', 14))
-    plt.ylabel(kwargs.get('ylabel', 'Frequency' if plot_type == 'hist' else ''), fontsize=kwargs.get('label_fontsize', 14))
-    plt.grid(kwargs.get('grid', True))
+    plt.title(title, fontsize=title_fontsize)
+    plt.xlabel(xlabel or variable, fontsize=label_fontsize)
+    plt.ylabel(ylabel or ('Frequency' if plot_type == 'hist' else ''), fontsize=label_fontsize)
+    plt.grid(grid)
     plt.show()
 
 
