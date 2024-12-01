@@ -57,10 +57,11 @@ def plot_variable(df, variable, plot_type='hist', figsize=(10, 6), title=None, k
     plt.grid(grid)
     plt.show()
 
+
 def plot_kde_for_column(dataframe, column_name):
     """
     Plots a KDE distribution for a specified column in a DataFrame.
-    
+
     Parameters:
     - dataframe: pandas.DataFrame, the data source
     - column_name: str, the name of the column to plot
@@ -77,6 +78,7 @@ def plot_kde_for_column(dataframe, column_name):
     # Show the plot
     plt.tight_layout()
     plt.show()
+
 
 # 2 : Processing
 
