@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from datetime import datetime
+from sklearn.ensemble import RandomForestRegressor
 
 
 # 1 : Plotting
@@ -118,6 +119,51 @@ def column_filler(df, col, type=None):
 
     else:
         raise ValueError(f"Unsupported data type: {df[col].dtype}")
+
+
+def advanced_column_filler(df, col, model=None):
+    """
+    Fills missing values in a specified column of a DataFrame using an advanced model-based approach.
+
+    Parameters:
+    - df (pd.DataFrame): The DataFrame containing the column to fill.
+    - col (str): The name of the column to process.
+    - model (optional): The model to use for imputation. Defaults to RandomForestRegressor.
+
+    Behavior:
+    - For numerical columns:
+        - Trains the specified model to predict missing values using other columns as predictors.
+    - If no missing values are detected in the column, returns the DataFrame unchanged.
+    """
+    if df[col].dtype not in ['int64', 'float64']:
+        raise ValueError(f"Only numerical columns are supported, but {col} has type {df[col].dtype}.")
+
+    if df[col].isnull().sum() == 0:
+        print(f"No missing values in column {col}. Skipping imputation.")
+        return df
+
+    if model is None:
+        model = RandomForestRegressor(random_state=42, n_estimators=100)
+
+    # Séparer les lignes avec et sans valeurs manquantes
+    df_missing = df[df[col].isnull()]
+    df_non_missing = df[df[col].notnull()]
+
+    # Définir les features (toutes les autres colonnes) et la cible
+    X_train = df_non_missing.drop(columns=[col])
+    y_train = df_non_missing[col]
+    X_missing = df_missing.drop(columns=[col])
+
+    # Entraîner le modèle sur les données complètes
+    model.fit(X_train, y_train)
+
+    # Prédire les valeurs manquantes
+    predicted_values = model.predict(X_missing)
+
+    # Remplacer les valeurs manquantes par les prédictions
+    df.loc[df[col].isnull(), col] = predicted_values
+
+    return df
 
 
 def separate_col(df, list):
